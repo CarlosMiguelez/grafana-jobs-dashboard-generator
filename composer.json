@@ -1,0 +1,14 @@
+{
+  "name": "vendor_name/grafana-jobs-dashboard-generator",
+  "description": "description",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Carlos Miguelez",
+      "email": "carlos.miguelez@powwow.de"
+    }
+  ],
+  "require": {
+  }
+}
