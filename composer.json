@@ -1,14 +1,34 @@
 {
-  "name": "vendor_name/grafana-jobs-dashboard-generator",
-  "description": "description",
-  "minimum-stability": "stable",
+  "name": "cami/grafana-jobs-dashboard-generator",
+  "description": "Grafana Jobs dashboard generator",
+  "minimum-stability": "dev",
   "license": "proprietary",
-  "authors": [
-    {
-      "name": "Carlos Miguelez",
-      "email": "carlos.miguelez@powwow.de"
+  "prefer-stable": true,
+  "autoload": {
+    "psr-4": {
+      "Utility\\": "src/Utility/"
     }
-  ],
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Test\\": "tests/",
+      "Utility\\": "src/Utility/"
+    }
+  },
+  "config": {
+    "preferred-install": "dist",
+    "platform": {
+      "php": "7.4.15"
+    },
+    "use-include-path": true,
+    "sort-packages": true,
+    "process-timeout": 900
+  },
   "require": {
+    "php": ">=7.4",
+    "ext-json": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "9.3.8"
   }
 }

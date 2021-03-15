@@ -1,0 +1,69 @@
+#!/bin/bash
+
+set -e
+
+CMD1=${1:-}
+CMDARGS=${@:2}
+
+PROJECT_NAME="app"
+APP_SERVICE="app"
+PHPUNIT_CACHE_FILE='.phpunit.result.cache'
+CACHE_FOLDER='.cache'
+VENDOR_FOLDER='vendor'
+DOCKER_COMPOSE_COMMAND="docker-compose -p ${PROJECT_NAME} -f .docker/docker-compose.yml"
+
+function cmd_build {
+    cmd_destroy
+    ${DOCKER_COMPOSE_COMMAND} build ${APP_SERVICE}
+    ${DOCKER_COMPOSE_COMMAND} run ${APP_SERVICE} php -v
+    ${DOCKER_COMPOSE_COMMAND} run ${APP_SERVICE} composer install -o
+}
+
+function cmd_destroy {
+    if [[ $(docker ps -aq -f name="${APP_SERVICE}" | wc -l) -gt 0 ]]; then
+        echo ""
+        echo "Removing app specific docker resources ..."
+        ${DOCKER_COMPOSE_COMMAND} down -v --remove-orphans || true
+    fi
+
+    if [[ -f "${PHPUNIT_CACHE_FILE}" ]]; then
+        echo ""
+        echo "Removing ${PHPUNIT_CACHE_FILE} file ..."
+        sudo rm "${PHPUNIT_CACHE_FILE}"
+    fi
+
+    if [[ -d "${CACHE_FOLDER}" ]]; then
+        echo ""
+        echo "Removing ${CACHE_FOLDER} folder ..."
+        sudo rm -rf "${CACHE_FOLDER}"
+    fi
+
+    if [[ -d "${VENDOR_FOLDER}" ]]; then
+        echo ""
+        echo "Removing ${VENDOR_FOLDER} folder ..."
+        sudo rm -rf ${VENDOR_FOLDER}
+    fi
+}
+
+function cmd_composer {
+    ${DOCKER_COMPOSE_COMMAND} run ${APP_SERVICE} composer ${CMDARGS}
+}
+
+function cmd_phpunit {
+    ${DOCKER_COMPOSE_COMMAND} run ${APP_SERVICE} vendor/bin/phpunit
+}
+
+function cmd_help {
+  printf "\033[33mCLI commands:\033[0m\n"
+  awk 'BEGIN{FS="cmd_| ;;( ## ?)?"} /^.*?[*]+\) cmd_[a-zA-Z_\-]+ ;;/ {printf "  \033[32m%-30s\033[0m %s\n", $2, $3}' $0
+  awk 'BEGIN{FS="^[ ]+|\\) |## "} /^.*?[^*]+\) cmd_[a-zA-Z_\-]+ ;;/ {printf "  \033[32m%-30s\033[0m %s\n", $2, $4}' $0
+}
+
+shift || true
+case ${CMD1} in
+    app:build) cmd_build ;; ## Initializes the application and installs composer packages
+    app:destroy) cmd_destroy ;; ## Cleans up files, folders and docker resources generated
+    app:composer) cmd_composer ;; ## Runs composer with given arguments
+    app:phpunit) cmd_phpunit ;; ## Runs phpunit tests
+    *) cmd_help ;; ## Prints available commands
+esac

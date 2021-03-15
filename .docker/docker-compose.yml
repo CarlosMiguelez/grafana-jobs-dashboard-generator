@@ -1,0 +1,11 @@
+version: '3'
+services:
+  app:
+    # Version 2.0.8 is the latest one that runs on php 7.4.x
+    image: composer:2.0.8
+    container_name: app
+    environment:
+      - COMPOSER_CACHE_DIR=/app/.cache/composer
+    volumes:
+      - ..:/app
+    restart: never
